@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\Admin\Transformers\Blog;
+namespace Modules\Admin\Transformers\Blog\Post;
 
 use Illuminate\Http\Resources\Json\ResourceCollection;
 
