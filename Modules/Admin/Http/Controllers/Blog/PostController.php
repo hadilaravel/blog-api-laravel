@@ -18,6 +18,14 @@ class PostController extends Controller
         ]);
     }
 
+    public function postActive()
+    {
+        $posts = Post::query()->where('status' , 1)->get();
+        return response()->json([
+            'posts' => new PostCollection($posts)
+        ]);
+    }
+
     public function store(PostRequest $request)
     {
         $inputs = [

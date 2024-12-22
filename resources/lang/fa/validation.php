@@ -235,6 +235,8 @@ return [
         'meta_key' => 'ویژگی',
         'payment_type' => 'نوع پرداخت',
         'meta_value' => 'مقدار',
+        'activation' => 'وضعیت',
+        'profile' => 'پروفایل',
     ],
 
     'permission categories' => 'دسترسی به دسته بندی ها'

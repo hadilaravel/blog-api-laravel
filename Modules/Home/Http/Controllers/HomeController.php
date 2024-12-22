@@ -1,12 +1,12 @@
 <?php
 
-namespace Modules\Auth\Http\Controllers;
+namespace Modules\Home\Http\Controllers;
 
 use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 
-class AuthController extends Controller
+class HomeController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -14,7 +14,7 @@ class AuthController extends Controller
      */
     public function index()
     {
-        return view('auth::index');
+        return view('home::index');
     }
 
     /**
@@ -23,7 +23,7 @@ class AuthController extends Controller
      */
     public function create()
     {
-        return view('auth::create');
+        return view('home::create');
     }
 
     /**
@@ -43,7 +43,7 @@ class AuthController extends Controller
      */
     public function show($id)
     {
-        return view('auth::show');
+        return view('home::show');
     }
 
     /**
@@ -53,7 +53,7 @@ class AuthController extends Controller
      */
     public function edit($id)
     {
-        return view('auth::edit');
+        return view('home::edit');
     }
 
     /**

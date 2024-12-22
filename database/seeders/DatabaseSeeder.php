@@ -5,8 +5,11 @@ namespace Database\Seeders;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 use Modules\Access\Entities\Permission;
 use Modules\Access\Entities\Role;
+use Modules\Admin\Entities\Setting\Settinge;
+use Modules\Admin\Entities\Setting\SmsSetting;
 
 class DatabaseSeeder extends Seeder
 {
@@ -16,14 +19,13 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
 
-
 //        admin
         $user = User::query()->where('username' , 'admin')->first();
         if(empty($user)) {
             $user =  User::query()->create([
                 'name' => 'admin',
                 'username' => 'admin',
-                'password' => bcrypt('Blog@22'),
+                'password' => Hash::make('Blog@22'),
                 'user_type' => 1,
                 'activation' => 1,
                 'profile' => 'image/admin/admin.png'

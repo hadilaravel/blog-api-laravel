@@ -19,6 +19,22 @@ class CategoryController extends Controller
         ]);
     }
 
+    public function categoryActive()
+    {
+        $categories = Category::query()->where('status' , 1)->get();
+        return \response()->json([
+            'categories' => new CategoryCollection($categories)
+        ]);
+    }
+
+    public function activeCategories()
+    {
+        $categories = Category::query()->where('status' , 1)->get();
+        return \response()->json([
+            'categories' => new CategoryCollection($categories)
+        ]);
+    }
+
     public function store(CategoryRequest $request)
     {
         $inputs = [

@@ -5,75 +5,90 @@ namespace Modules\Access\Http\Controllers;
 use Illuminate\Contracts\Support\Renderable;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Modules\Access\Entities\Permission;
+use Modules\Access\Entities\Role;
+use Modules\Access\Http\Requests\PermissionRequest;
+use Modules\Access\Http\Requests\RoleRequest;
 
 class AccessController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     * @return Renderable
-     */
+
     public function index()
     {
-        return view('access::index');
+        $roles = Role::query()->whereNot('name' ,'super admin')->get();
+        return response()->json([
+            'roles' => $roles
+        ]);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     * @return Renderable
-     */
-    public function create()
+
+    public function store(RoleRequest $request)
     {
-        return view('access::create');
+        $inputs = [
+            'name' => $request->name,
+            'description' => $request->description,
+        ];
+      $role = Role::query()->create($inputs);
+     if($role)
+     {
+         return response()->json([
+             'msg' => 'عملیات با موفقیت انجام شد'
+         ]);
+     }else{
+         return response()->json([
+             'msg' => 'عملیات با خطا مواجه شد!!'
+         ]);
+     }
     }
 
-    /**
-     * Store a newly created resource in storage.
-     * @param Request $request
-     * @return Renderable
-     */
-    public function store(Request $request)
+
+    public function update(RoleRequest $request, Role $role)
     {
-        //
+        $inputs = [
+            'name' => $request->name,
+            'description' => $request->description,
+        ];
+        $role->update($inputs);
+        return response()->json([
+            'msg' => 'عملیات با موفقیت انجام شد'
+        ]);
     }
 
-    /**
-     * Show the specified resource.
-     * @param int $id
-     * @return Renderable
-     */
-    public function show($id)
+    public function destroy(Role $role)
     {
-        return view('access::show');
+        $role->delete();
+        return response()->json([
+            'msg' => 'عملیات با موفقیت انجام شد'
+        ]);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     * @param int $id
-     * @return Renderable
-     */
-    public function edit($id)
+
+
+    public function permissionShow(Role $role)
     {
-        return view('access::edit');
+        $permissions = Permission::all();
+        return response()->json([
+            'permissions' => $permissions,
+            'role' => $role
+        ]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     * @param Request $request
-     * @param int $id
-     * @return Renderable
-     */
-    public function update(Request $request, $id)
+    public function permissionStore(PermissionRequest $request , Role $role)
     {
-        //
+        $inputs = $request->all();
+        $inputs['permissions'] = $inputs['permissions'] ?? [];
+        $role->permissions()->sync($inputs['permissions']);
+        return response()->json([
+            'msg' => 'عملیات با موفقیت انجام شد'
+        ]);
     }
 
-    /**
-     * Remove the specified resource from storage.
-     * @param int $id
-     * @return Renderable
-     */
-    public function destroy($id)
+    public function permissionDelete(Role $role , Permission $permission)
     {
-        //
+        $role->permissions()->detach($permission->id);
+        return response()->json([
+            'msg' => 'عملیات با موفقیت انجام شد'
+        ]);
     }
+
 }

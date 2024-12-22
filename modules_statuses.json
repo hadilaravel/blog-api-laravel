@@ -1,5 +1,6 @@
 {
     "Admin": true,
     "Auth": true,
-    "Access": true
+    "Access": true,
+    "Home": true
 }
