@@ -9,11 +9,13 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Melipayamak\MelipayamakApi;
 use Modules\Admin\Entities\Setting\Settinge;
 use Modules\Admin\Entities\Setting\SmsSetting;
 use Modules\Auth\Entities\Otp;
+use Modules\Auth\Http\Requests\InformationRegisterRequest;
 use Modules\Auth\Http\Requests\RegisterRequest;
 
 
@@ -121,20 +123,28 @@ class RegisterController extends Controller
             $messageService->send();
         }
 
-        return to_route('auth.register.confirm.view' , $token);
+        return response()->json([
+          'token' => $token
+        ]);
     }
 
 
     public function viewConfirmRegister($token)
     {
-        $setting = Setting::query()->first();
+        $setting = Settinge::query()->first();
         $otp = Otp::query()->where('token' , $token)->first();
         if(empty($otp))
         {
-            return to_route('auth.register.view')->withErrors(['id' => 'آدرس وارد شده نامعتبر می باشد']);
+            return response()->json([
+                'msg' => 'آدرس وارد شده نامعتبر است'
+            ] , 403);
         }
         $loginId = $otp->login_id;
-        return view('auth::registerVerify' , compact('loginId' , 'setting' , 'token'));
+        return response()->json([
+            'token' => $token,
+            'loginId' => $loginId,
+            'setting' => $setting
+        ]);
     }
 
     public function storeConfirmRegister(Request $request  , $token)
@@ -145,11 +155,15 @@ class RegisterController extends Controller
         $inputs = $request->all();
         $otp = Otp::query()->where('token' , $token)->where('used' , 0)->first();
         if(empty($otp)){
-            return to_route('auth.register.view')->withErrors(['otp_code' => 'آدرس وارد شده نامعتبر است']);
+            return response()->json([
+                'msg' => 'آدرس وارد شده نامعتبر است'
+            ] , 403);
         }
 
         if($otp->otp_code !== $inputs['otp_code']){
-            return to_route('auth.register.confirm.view' , $token)->withErrors(['otp_code' => 'کد وارد شده نامعتبر است']);
+            return response()->json([
+                'msg' => 'کد وارد شده نامعتبر است'
+            ]);
         }
 
         $otp->update(['used' => 1]);
@@ -162,16 +176,22 @@ class RegisterController extends Controller
         {
             $user->update(['email_verified_at' => Carbon::now()]);
         }
+        $accessToken = $user->createToken($otp->login_id)->plainTextToken;
         Auth::loginUsingId($user->id);
-        return  to_route('auth.register.information');
+        return  response()->json([
+            'user' => Auth::user(),
+            'accessToken' => $accessToken
+        ]);
     }
 
     public function sendAgainCode($token)
     {
-        $setting = Setting::query()->first();
+        $setting = Settinge::query()->first();
         $otp = Otp::query()->where('token' , $token)->where('used' , 0)->first();
         if(empty($otp)){
-            return to_route('auth.register.confirm.view' , $token)->withErrors(['otp_code' => 'آدرس وارد شده نامعتبر است']);
+            return response()->json([
+                'msg' => 'آدرس وارد شده نامعتبر است'
+            ] , 403);
         }
 
         //send sms or email
@@ -192,18 +212,14 @@ class RegisterController extends Controller
                     $response = $sms->send($to, $from, $text);
                     $json = json_decode($response);
                 } catch (\Exception $e) {
-                    alert()->error('تنظیمات مربوط به ارسال پیامک انجام نشده است');
-                    return back();
+                    return response()->json([
+                        'msg' => 'تنظیمات مربوط به ارسال پیامک درست انجام نشده است'
+                    ]);
                 }
             }
         }
         elseif($otp->type === 1 )
         {
-            $settingEmail = SettingEmail::query()->first();
-            $envService = new Env();
-            $envService->set("MAIL_USERNAME", $settingEmail->name);
-            $envService->set("MAIL_PASSWORD", $settingEmail->password);
-
             $emailService = new EmailService();
             $details = [
                 'title' => $title,
@@ -218,32 +234,25 @@ class RegisterController extends Controller
             $messageService->send();
         }
 
-        return to_route('auth.register.confirm.view' , $token)->with('success' , 'ارسال دوباره کد با موفقیت انجام شد');
-
+        return response()->json([
+            'msg' => 'ارسال دوباره کد با موفقیت انجام شد',
+            'token' => $token
+        ]);
     }
 
-
-    public function fillInformation()
-    {
-        $setting = Setting::query()->first();
-        return view('auth::information' , compact('setting'));
-    }
 
     public function fillInformationStore(InformationRegisterRequest $request)
     {
-        if(!\auth()->check())
-        {
-            return to_route('auth.register.view');
-        }
         $inputs = [
             'name' => $request->name,
             'username' => $request->username,
-            'password' => bcrypt($request->password),
+            'password' => Hash::make($request->password),
         ];
         $user = \auth()->user();
         $user->update($inputs);
-        alert()->success('شما با موفقیت ثبت نام شدید');
-        return to_route('home.index');
+        return  response()->json([
+            'msg' => 'شما با موفقیت ثبت نام شدید',
+        ]);
     }
 
 

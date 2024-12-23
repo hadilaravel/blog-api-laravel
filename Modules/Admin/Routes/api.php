@@ -8,6 +8,8 @@ use Modules\Admin\Http\Controllers\Setting\SettingeController;
 use Modules\Admin\Http\Controllers\User\AdminController;
 use Modules\Admin\Http\Controllers\User\CustomerController;
 use Modules\Admin\Http\Controllers\Setting\SmsSettingController;
+use Modules\Access\Http\Controllers\AccessController;
+use Modules\Admin\Http\Controllers\User\AdminLoginController;
 
 /*
 |--------------------------------------------------------------------------
@@ -20,15 +22,7 @@ use Modules\Admin\Http\Controllers\Setting\SmsSettingController;
 |
 */
 
-Route::prefix('admin')->group(function (){
-
-    Route::prefix('category')->group(function (){
-        Route::get('/' , [CategoryController::class , 'index']);
-        Route::post('store' , [CategoryController::class , 'store']);
-        Route::put('update/{category}' , [CategoryController::class , 'update']);
-        Route::delete('delete/{category}' , [CategoryController::class , 'delete']);
-        Route::get('status/{category}' , [CategoryController::class , 'status']);
-    });
+Route::middleware(['auth:sanctum' , 'auth.check'])->prefix('admin')->group(function (){
 
     Route::prefix('category')->group(function (){
         Route::get('/' , [CategoryController::class , 'index']);
@@ -80,5 +74,18 @@ Route::prefix('admin')->group(function (){
         Route::get('role-delete/{user}/{role}' , [AdminController::class , 'roleDelete']);
     });
 
+    Route::prefix('role')->group(function (){
+        Route::get('/' , [AccessController::class , 'index']);
+        Route::post('store' , [AccessController::class , 'store']);
+        Route::put('update/{role}' , [AccessController::class , 'update']);
+        Route::delete('destroy/{role}' , [AccessController::class , 'destroy']);
+        Route::get('permission/{role}' , [AccessController::class , 'permissionShow']);
+        Route::post('permission/{role}' , [AccessController::class , 'permissionStore']);
+        Route::get('delete/permission/{role}/{permission}' , [AccessController::class , 'permissionDelete']);
+    });
 
+});
+
+Route::prefix('admin-login')->group(function (){
+    Route::post('store' , [AdminLoginController::class , 'store'])->name('admin.admin-login.store');
 });

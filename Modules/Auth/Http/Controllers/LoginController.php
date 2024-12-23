@@ -13,27 +13,15 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Melipayamak\MelipayamakApi;
-use Modules\Admin\Entities\Setting\Setting;
-use Modules\Admin\Entities\Setting\SettingEmail;
+use Modules\Admin\Entities\Setting\Settinge;
 use Modules\Admin\Entities\Setting\SmsSetting;
 use Modules\Auth\Entities\Otp;
 use Modules\Auth\Http\Requests\LoginRequest;
 use Modules\Auth\Http\Requests\RegisterRequest;
-use SoulDoit\SetEnv\Env;
 
 class LoginController extends Controller
 {
 
-    public function viewLogin()
-    {
-        $settingEmail = SettingEmail::query()->first();
-        $envService = new Env();
-        $envService->set("MAIL_USERNAME", $settingEmail->name);
-        $envService->set("MAIL_PASSWORD", $settingEmail->password);
-
-        $setting = Setting::query()->first();
-        return view('auth::login' , compact('setting'));
-    }
 
     public function storeLogin(LoginRequest $request)
     {
@@ -45,15 +33,22 @@ class LoginController extends Controller
             $type = 1; // 1 => email
             $user = User::query()->where('email', $inputs['id'])->first();
             if(empty($user)){
-                return back()->withErrors(['id' => 'ایمیل وارد شده وجود ندارد']);
+                return response()->json([
+                    'msg' => 'ایمیل وارد شده وجود ندارد'
+                ]);
             }
             if(Hash::check($request->password , $user->password ))
             {
+                $accessToken = $user->createToken($user->email)->plainTextToken;
                 Auth::loginUsingId($user->id);
-                alert()->success('شما با موفقیت وارد شدید');
-                return to_route('home.index');
+                return  response()->json([
+                    'user' => Auth::user(),
+                    'accessToken' => $accessToken
+                ]);
             }else{
-                return back()->withErrors(['id' => 'رمز عبور وارد شده اشتباه است']);
+                return response()->json([
+                    'msg' => 'رمز عبور وارد شده اشتباه است !'
+                ]);
             }
         }
 
@@ -67,33 +62,37 @@ class LoginController extends Controller
             $inputs['id'] = str_replace('+98', '', $inputs['id']);
             $user = User::query()->where('mobile', $inputs['id'])->first();
             if(empty($user)){
-                return back()->withErrors(['id' => 'شماره همراه وارد شده وجود ندارد']);
+                return response()->json([
+                    'msg' => 'شماره همراه وارد شده وجود ندارد !'
+                ]);
             }
             if(Hash::check($request->password , $user->password))
             {
+                $accessToken = $user->createToken($user->mobile)->plainTextToken;
                 Auth::loginUsingId($user->id);
-                alert()->success('شما با موفقیت وارد شدید');
-                return to_route('home.index');
+                return  response()->json([
+                    'user' => Auth::user(),
+                    'accessToken' => $accessToken
+                ]);
             }else{
-                return back()->withErrors(['id' => 'رمز عبور وارد شده اشتباه است']);
+                return response()->json([
+                    'msg' => 'رمز عبور وارد شده اشتباه است !'
+                ]);
             }
         }
         else{
-            return back()->withErrors(['id' => 'شناسه ورودی شما نه شماره موبایل است نه ایمیل']);
+            return response()->json([
+                'msg' => 'شناسه ورودی نه شماره موبایل است نه ایمیل'
+            ]);
         }
 
     }
 
-    public function viewInfoLogin()
-    {
-        $setting = Setting::query()->first();
-        return view('auth::info-login' , compact('setting'));
-    }
 
     public function viewInfoLoginStore(RegisterRequest $request)
     {
         $inputs = $request->all();
-        $setting = Setting::query()->first();
+        $setting = Settinge::query()->first();
 
         //check id is email or not
         if(filter_var($inputs['id'], FILTER_VALIDATE_EMAIL))
@@ -101,7 +100,9 @@ class LoginController extends Controller
             $type = 1; // 1 => email
             $user = User::query()->where('email', $inputs['id'])->first();
             if(empty($user)){
-                return back()->withErrors(['id' => 'ایمیل وارد شده وجود ندارد']);
+                return response()->json([
+                    'msg' => 'ایمیل وارد شده وجود ندارد'
+                ]);
             }
         }
 
@@ -116,11 +117,15 @@ class LoginController extends Controller
 
             $user = User::query()->where('mobile', $inputs['id'])->first();
             if(empty($user)){
-                return back()->withErrors(['id' => 'شماره همراه وارد شده وجود ندارد']);
+                return response()->json([
+                    'msg' => 'شماره همراه وارد شده وجود ندارد !'
+                ]);
             }
         }
         else{
-            return back()->withErrors(['id' => 'شناسه ورودی شما نه شماره موبایل است نه ایمیل']);
+            return response()->json([
+                'msg' => 'شناسه ورودی نه شماره موبایل است نه ایمیل'
+            ]);
         }
 
         //create otp code
@@ -154,8 +159,9 @@ class LoginController extends Controller
                     $response = $sms->send($to, $from, $text);
                     $json = json_decode($response);
                 } catch (\Exception $e) {
-                    alert()->error('تنظیمات مربوط به ارسال پیامک انجام نشده است');
-                    return back();
+                    return response()->json([
+                        'msg' => 'تنظیمات مربوط به ارسال پیامک درست انجام نشده است'
+                    ]);
                 }
             }
         }
@@ -175,20 +181,28 @@ class LoginController extends Controller
             $messageService->send();
         }
 
-        return to_route('auth.login.confirm.view' , $token);
+        return response()->json([
+            'token' => $token
+        ]);
 
     }
 
     public function viewConfirmLogin($token)
     {
-        $setting = Setting::query()->first();
+        $setting = Settinge::query()->first();
         $otp = Otp::query()->where('token' , $token)->first();
         if(empty($otp))
         {
-            return to_route('auth.login.information-login')->withErrors(['id' => 'آدرس وارد شده نامعتبر می باشد']);
+            return response()->json([
+                'msg' => 'آدرس وارد شده نامعتبر است'
+            ] , 403);
         }
         $loginId = $otp->login_id;
-        return view('auth::loginVerify' , compact('loginId' , 'setting' , 'token'));
+        return response()->json([
+            'token' => $token,
+            'loginId' => $loginId,
+            'setting' => $setting
+        ]);
     }
 
     public function storeConfirmLogin(Request $request  , $token)
@@ -199,11 +213,15 @@ class LoginController extends Controller
         $inputs = $request->all();
         $otp = Otp::query()->where('token' , $token)->where('used' , 0)->first();
         if(empty($otp)){
-            return to_route('auth.login.information-login')->withErrors(['otp_code' => 'آدرس وارد شده نامعتبر است']);
+            return response()->json([
+                'msg' => 'آدرس وارد شده نامعتبر است'
+            ] , 403);
         }
 
         if($otp->otp_code !== $inputs['otp_code']){
-            return to_route('auth.login.confirm.view' , $token)->withErrors(['otp_code' => 'کد وارد شده نامعتبر است']);
+            return response()->json([
+                'msg' => 'آدرس وارد شده نامعتبر است'
+            ] , 403);
         }
 
         $otp->update(['used' => 1]);
@@ -216,10 +234,21 @@ class LoginController extends Controller
         {
             $user->update(['email_verified_at' => Carbon::now()]);
         }
+        $accessToken = $user->createToken($otp->login_id)->plainTextToken;
         Auth::loginUsingId($user->id);
-        alert()->success('شما با موفقیت  وارد شدید');
-        return  to_route('home.index');
+        return  response()->json([
+            'user' => Auth::user(),
+            'accessToken' => $accessToken
+        ]);
     }
 
+    public function logout ()
+    {
+        $user = Auth::user();
+        $user->tokens()->delete();
+        return response()->json([
+           'msg' => 'شما با موفقیت خارج شدید'
+        ]);
+    }
 
 }
