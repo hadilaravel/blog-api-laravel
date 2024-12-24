@@ -24,7 +24,9 @@ use Modules\Admin\Http\Controllers\User\AdminLoginController;
 
 Route::middleware(['auth:sanctum' , 'auth.check'])->prefix('admin')->group(function (){
 
-    Route::prefix('category')->group(function (){
+    Route::get('/' ,[AdminController::class , 'indexAdmin']);
+
+    Route::middleware('permission:PermissionCategory')->prefix('category')->group(function (){
         Route::get('/' , [CategoryController::class , 'index']);
         Route::post('store' , [CategoryController::class , 'store']);
         Route::put('update/{category}' , [CategoryController::class , 'update']);
@@ -32,7 +34,7 @@ Route::middleware(['auth:sanctum' , 'auth.check'])->prefix('admin')->group(funct
         Route::get('status/{category}' , [CategoryController::class , 'status']);
     });
 
-    Route::prefix('post')->group(function (){
+    Route::middleware('permission:PermissionPost')->prefix('post')->group(function (){
         Route::get('/' , [PostController::class , 'index']);
         Route::get('active-categories' , [CategoryController::class , 'activeCategories']);
         Route::post('store' , [PostController::class , 'store']);
@@ -42,29 +44,29 @@ Route::middleware(['auth:sanctum' , 'auth.check'])->prefix('admin')->group(funct
     });
 
     //     setting
-    Route::prefix('setting')->group(function (){
+    Route::middleware('permission:PermissionSetting')->prefix('setting')->group(function (){
         Route::get('/', [SettingeController::class, 'index'])->name('admin.setting.index');
         Route::put('update/{setting}', [SettingeController::class, 'update'])->name('admin.setting.update');
     });
 
     //      sms setting
-    Route::prefix('sms-setting')->group(function () {
+    Route::middleware('permission:PermissionSmsSetting')->prefix('sms-setting')->group(function () {
         Route::get('/', [SmsSettingController::class, 'index'])->name('admin.setting.sms-setting.index');
         Route::put('update/{smsSetting}', [SmsSettingController::class, 'update'])->name('admin.setting.sms-setting.update');
     });
 
-    Route::prefix('comments')->group(function (){
+    Route::middleware('permission:PermissionComment')->prefix('comments')->group(function (){
         Route::get('/' , [CommentController::class , 'index']);
         Route::delete('delete/{comment}' , [CommentController::class , 'delete']);
         Route::get('status/{comment}' , [CommentController::class , 'status']);
     });
 
-    Route::prefix('customer')->group(function (){
+    Route::middleware('permission:PermissionCustomer')->prefix('customer')->group(function (){
         Route::get('/', [CustomerController::class, 'index']);
         Route::get('/activation/{user}', [CustomerController::class, 'activation']);
     });
 
-    Route::prefix('user-admin')->group(function (){
+    Route::middleware('permission:PermissionUserAdmin')->prefix('user-admin')->group(function (){
         Route::get('/' , [AdminController::class , 'index']);
         Route::post('store' , [AdminController::class , 'store']);
         Route::put('update/{user}' , [AdminController::class , 'update']);
@@ -74,7 +76,7 @@ Route::middleware(['auth:sanctum' , 'auth.check'])->prefix('admin')->group(funct
         Route::get('role-delete/{user}/{role}' , [AdminController::class , 'roleDelete']);
     });
 
-    Route::prefix('role')->group(function (){
+    Route::middleware('permission:PermissionRole')->prefix('role')->group(function (){
         Route::get('/' , [AccessController::class , 'index']);
         Route::post('store' , [AccessController::class , 'store']);
         Route::put('update/{role}' , [AccessController::class , 'update']);

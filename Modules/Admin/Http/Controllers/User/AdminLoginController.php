@@ -9,6 +9,7 @@ use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
+use Modules\Admin\Transformers\User\UserAdminResource;
 
 class AdminLoginController extends Controller
 {
@@ -33,7 +34,7 @@ class AdminLoginController extends Controller
             $accessToken = $user->createToken($user->username)->plainTextToken;
             Auth::loginUsingId($user->id);
             return  response()->json([
-                'user' => Auth::user(),
+                'user' => new UserAdminResource(Auth::user()),
                 'accessToken' => $accessToken
             ]);
         }else{

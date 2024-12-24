@@ -10,6 +10,8 @@ use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Hash;
 use Modules\Access\Entities\Role;
 use Modules\Admin\Http\Requests\User\UserAdminRequest;
+use Modules\Admin\Transformers\User\UserAdminCollection;
+use Modules\Admin\Transformers\User\UserAdminResource;
 
 class AdminController extends Controller
 {
@@ -18,11 +20,17 @@ class AdminController extends Controller
     {
         $userAdmins = User::query()->where('user_type' , 1)->get()->except(auth()->id());
         return response()->json([
-            'userAdmins' => $userAdmins
+            'userAdmins' => new UserAdminCollection($userAdmins)
         ]);
     }
 
-
+    public function indexAdmin()
+    {
+        $user = auth()->user();
+        return response()->json([
+           'admin ' => new UserAdminResource($user)
+        ]);
+    }
 
     public function store(UserAdminRequest $request)
     {
