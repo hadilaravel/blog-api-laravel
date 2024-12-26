@@ -7,6 +7,7 @@ use Illuminate\Routing\Controller;
 use Modules\Admin\Entities\Blog\Post;
 use Modules\Admin\Http\Requests\Blog\PostRequest;
 use Modules\Admin\Transformers\Blog\Post\PostCollection;
+use Modules\Admin\Transformers\Blog\Post\PostResource;
 
 class PostController extends Controller
 {
@@ -18,13 +19,6 @@ class PostController extends Controller
         ]);
     }
 
-    public function postActive()
-    {
-        $posts = Post::query()->where('status' , 1)->get();
-        return response()->json([
-            'posts' => new PostCollection($posts)
-        ]);
-    }
 
     public function store(PostRequest $request)
     {
@@ -81,6 +75,7 @@ class PostController extends Controller
             'msg' => 'عملیات با موفقیت انجام شد'
         ]);
     }
+
 
     public function status(Post $post)
     {
