@@ -21,10 +21,10 @@ class UserAdminResource extends JsonResource
         "mobile"=> $this->mobile,
         "email"=> $this->email,
         "user_type" => $this->type_user,
-        "activation" => $this->activation_user,
-        "profile" => asset($this->profile),
-        "created_at" => $this->created_at,
-        "updated_at" => $this->updated_at
+            "activation" => $this->activation,
+            "activationUser" => $this->activation_user,
+            "profile" => $this->profile ? asset($this->profile) : 1,
+            'created_at' => convertEnglishToPersian(jdate($this->created_at)->format('Y-m-d'))
         ];
     }
 }

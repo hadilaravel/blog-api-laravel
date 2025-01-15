@@ -21,11 +21,11 @@ class PostResource extends JsonResource
             "slug" => $this->slug,
             "body" => $this->body,
             "image" => asset($this->image),
-            "status" => $this->status_post,
-            "commentable" => $this->comment_post,
+            "status" => $this->status,
+            "commentable" => $this->commentable,
             "category" => $this->category->name,
-            "created_at" => $this->created_at,
-            "updated_at" => $this->updated_at,
+            "category_id" => $this->category_id,
+            'created_at' => convertEnglishToPersian(jdate($this->created_at)->format('Y-m-d'))
         ];
     }
 }

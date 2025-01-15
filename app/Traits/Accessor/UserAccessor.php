@@ -22,7 +22,7 @@ trait UserAccessor
         {
             $result = 'فعال';
         }else{
-            $result = 'غیر فعال';
+            $result = 'غیرفعال';
         }
         return $result;
     }

@@ -11,7 +11,7 @@ trait CategoryAccessor
         {
             $result = 'فعال';
         }else{
-            $result = 'غیر فعال';
+            $result = 'غیرفعال';
         }
         return $result;
     }

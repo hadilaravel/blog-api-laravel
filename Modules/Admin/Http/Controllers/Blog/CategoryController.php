@@ -8,14 +8,17 @@ use Illuminate\Routing\Controller;
 use Modules\Admin\Entities\Blog\Category;
 use Modules\Admin\Http\Requests\Blog\CategoryRequest;
 use Modules\Admin\Transformers\Blog\Category\CategoryCollection;
+use Modules\Admin\Transformers\Blog\Category\CategoryResource;
 
 class CategoryController extends Controller
 {
 
     public function index()
     {
+        $catCount = Category::all();
         return \response()->json([
-            'categories' => new CategoryCollection(Category::all())
+            'categories' => new CategoryCollection(Category::query()->paginate(8)),
+            'entityCount' => $catCount->count()
         ]);
     }
 
@@ -27,11 +30,26 @@ class CategoryController extends Controller
         ]);
     }
 
+    public function editActiveCategories(Category $category)
+    {
+        $categories = Category::query()->where('status' , 1)->get()->except($category->id);
+        return \response()->json([
+            'categories' => new CategoryCollection($categories)
+        ]);
+    }
+
     public function activeCategories()
     {
         $categories = Category::query()->where('status' , 1)->get();
         return \response()->json([
             'categories' => new CategoryCollection($categories)
+        ]);
+    }
+
+    public function singleCategory(Category $category)
+    {
+        return response()->json([
+            'category' => new CategoryResource($category)
         ]);
     }
 
@@ -65,7 +83,7 @@ class CategoryController extends Controller
         $inputs['slug'] = persianSlug($request->name);
         $category->update($inputs);
         return \response()->json([
-            'msg' => 'عملیات با موفقیت انجام شد'
+            'msg' => 'دسته بندی با موفقیت ویرایش شد'
         ]);
     }
 
@@ -73,7 +91,7 @@ class CategoryController extends Controller
     {
         $category->delete();
         return \response()->json([
-            'msg' => 'عملیات با موفقیت انجام شد'
+            'msg' => 'دسته بندی با موفقیت حذف شد'
         ]);
     }
 

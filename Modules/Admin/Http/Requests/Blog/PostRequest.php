@@ -13,6 +13,7 @@ class PostRequest extends FormRequest
      */
     public function rules()
     {
+        $id = request()->id;
         if($this->isMethod('post')){
             return [
                 'title' => 'required|max:120|min:2',
@@ -25,7 +26,7 @@ class PostRequest extends FormRequest
         }
         else{
             return [
-                'title' => 'required|max:120|min:2',
+                'title' => ['required' , 'min:2' , 'max:190' , 'unique:posts,title,' .  $id ],
                 'body' => 'required|min:5',
                 'category_id' => 'required|min:1|max:10000000000|regex:/^[0-9]+$/u|exists:categories,id',
                 'image' => 'nullable|image|mimes:png,jpg,jpeg,gif,webp',

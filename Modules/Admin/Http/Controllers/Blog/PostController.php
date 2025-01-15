@@ -3,6 +3,7 @@
 namespace Modules\Admin\Http\Controllers\Blog;
 
 use App\Service\ShareService;
+use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Modules\Admin\Entities\Blog\Post;
 use Modules\Admin\Http\Requests\Blog\PostRequest;
@@ -12,13 +13,27 @@ use Modules\Admin\Transformers\Blog\Post\PostResource;
 class PostController extends Controller
 {
 
-    public function index()
+    public function index(Request $request)
     {
+        if(isset($request->search)){
+            $search = $request->search;
+            $posts = Post::query()->where('title' , 'LIKE', '%' . $search . '%' )->
+            where('body' , 'LIKE', '%' . $search . '%' )->get();
+        }else {
+            $search ='';
+            $posts = Post::all();
+        }
         return \response()->json([
-           'posts' => new PostCollection(Post::all())
+           'posts' => new PostCollection($posts)
         ]);
     }
 
+    public function singlePost(Post $post)
+    {
+        return response()->json([
+           'post' => new PostResource($post)
+        ]);
+    }
 
     public function store(PostRequest $request)
     {

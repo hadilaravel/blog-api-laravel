@@ -18,9 +18,18 @@ class AdminController extends Controller
 
     public function index()
     {
-        $userAdmins = User::query()->where('user_type' , 1)->get()->except(auth()->id());
+        $userAdmins = User::query()->where('user_type' , 1)->paginate(8)->except(auth()->id());
+        $userCount = User::query()->where('user_type' , 1)->get();
         return response()->json([
-            'userAdmins' => new UserAdminCollection($userAdmins)
+            'userAdmins' => new UserAdminCollection($userAdmins),
+            'entityCount' => $userCount->count()
+        ]);
+    }
+
+    public function singleUserAdmin(User $user)
+    {
+        return response()->json([
+           'userAdmin' => new UserAdminResource($user)
         ]);
     }
 

@@ -15,10 +15,14 @@ class CategoryResource extends JsonResource
     public function toArray($request)
     {
         return [
-          'name' => $this->name,
+            'id' => $this->id,
+            'name' => $this->name,
           'slug' => $this->slug,
-          'parent_id' => $this->parent->name ?? null,
-          'status' => $this->status_category
+          'parent_name' => $this->parent->name ?? null,
+            'parent_id' => $this->parent_id ?? null,
+            'status' => $this->status,
+            'status_name' => $this->status_category,
+            'created_at' => convertEnglishToPersian(jdate($this->created_at)->format('Y-m-d'))
         ];
     }
 }
