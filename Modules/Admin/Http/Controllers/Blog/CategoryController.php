@@ -13,12 +13,21 @@ use Modules\Admin\Transformers\Blog\Category\CategoryResource;
 class CategoryController extends Controller
 {
 
-    public function index()
+    public function index(Request $request)
     {
         $catCount = Category::all();
+        if(isset($request->search) || isset($request->take) ){
+            $search = $request->search;
+            $take = $request->take ?? 8;
+            $categories = Category::query()->where('name' , 'LIKE', '%' . $search . '%' )->paginate($take);
+        }else {
+            $search ='';
+            $categories = Category::query()->paginate(8);
+        }
         return \response()->json([
-            'categories' => new CategoryCollection(Category::query()->paginate(8)),
-            'entityCount' => $catCount->count()
+            'categories' => new CategoryCollection($categories),
+            'entityCount' => $catCount->count(),
+            'PageCount' => (int) ceil($categories->total() / $categories->perPage())
         ]);
     }
 

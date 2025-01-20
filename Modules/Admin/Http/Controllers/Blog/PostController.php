@@ -15,16 +15,19 @@ class PostController extends Controller
 
     public function index(Request $request)
     {
-        if(isset($request->search)){
+        $postCount = Post::all();
+        if(isset($request->search) || isset($request->take) ){
             $search = $request->search;
-            $posts = Post::query()->where('title' , 'LIKE', '%' . $search . '%' )->
-            where('body' , 'LIKE', '%' . $search . '%' )->get();
+            $take = $request->take ?? 8;
+            $posts = Post::query()->where('title' , 'LIKE', '%' . $search . '%' )->paginate($take);
         }else {
             $search ='';
-            $posts = Post::all();
+            $posts = Post::query()->paginate(8);
         }
         return \response()->json([
-           'posts' => new PostCollection($posts)
+           'posts' => new PostCollection($posts),
+            'entityCount' => $postCount->count(),
+            'PageCount' => (int) ceil($posts->total() / $posts->perPage())
         ]);
     }
 

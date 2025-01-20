@@ -16,13 +16,21 @@ use Modules\Admin\Transformers\User\UserAdminResource;
 class AdminController extends Controller
 {
 
-    public function index()
+    public function index(Request $request)
     {
-        $userAdmins = User::query()->where('user_type' , 1)->paginate(8)->except(auth()->id());
-        $userCount = User::query()->where('user_type' , 1)->get();
-        return response()->json([
+        $userAdminsCount = User::query()->where('user_type' , 1)->get();
+        if(isset($request->search) || isset($request->take) ){
+            $search = $request->search;
+            $take = $request->take ?? 8;
+            $userAdmins = User::query()->where('user_type' , 1)->where('name' , 'LIKE', '%' . $search . '%' )->paginate($take);
+        }else {
+            $search ='';
+            $userAdmins = User::query()->where('user_type' , 1)->paginate(8);
+        }
+        return \response()->json([
             'userAdmins' => new UserAdminCollection($userAdmins),
-            'entityCount' => $userCount->count()
+            'entityCount' => $userAdminsCount->count(),
+            'PageCount' => (int) ceil($userAdmins->total() / $userAdmins->perPage())
         ]);
     }
 

@@ -3,6 +3,7 @@
 namespace Modules\Admin\Transformers\Blog\Post;
 
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Str;
 use function asset;
 
 class PostResource extends JsonResource
@@ -20,6 +21,7 @@ class PostResource extends JsonResource
             "title" => $this->title,
             "slug" => $this->slug,
             "body" => $this->body,
+            "body_str" => Str::limit($this->body , 15),
             "image" => asset($this->image),
             "status" => $this->status,
             "commentable" => $this->commentable,
