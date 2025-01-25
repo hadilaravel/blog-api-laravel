@@ -17,6 +17,7 @@ return new class extends Migration
             $table->id();
             $table->string('title');
             $table->string('slug')->unique();
+            $table->tinyInteger('postLike')->default(0);
             $table->text('body');
             $table->text('image');
             $table->tinyInteger('status')->default(0);

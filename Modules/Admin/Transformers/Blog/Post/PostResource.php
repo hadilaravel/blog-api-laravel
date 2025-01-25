@@ -23,6 +23,7 @@ class PostResource extends JsonResource
             "body" => $this->body,
             "body_str" => Str::limit($this->body , 15),
             "image" => asset($this->image),
+            "postLike" => $this->postLike,
             "status" => $this->status,
             "commentable" => $this->commentable,
             "category" => $this->category->name,

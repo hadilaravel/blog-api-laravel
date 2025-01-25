@@ -16,7 +16,7 @@ class Post extends Model implements Viewable
 {
     use HasFactory , PostAccessor , Likeable , InteractsWithViews;
 
-    protected $fillable = ['title' , 'slug' , 'body' , 'image' , 'status' , 'commentable' , 'category_id'];
+    protected $fillable = ['title' , 'slug' , 'body' , 'image' , 'status' , 'postLike' , 'commentable' , 'category_id'];
 
     public function category()
     {
@@ -26,6 +26,11 @@ class Post extends Model implements Viewable
     public function comments()
     {
         return $this->morphMany(Comment::class , 'commentable');
+    }
+
+    public function activeComments()
+    {
+        return $this->comments()->where('status' , 1)->get();
     }
 
 }
