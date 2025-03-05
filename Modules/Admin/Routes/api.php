@@ -22,13 +22,11 @@ use Modules\Admin\Http\Controllers\User\AdminLoginController;
 |
 */
 
-//Route::middleware(['auth:sanctum' , 'auth.check'])->prefix('admin')->group(function (){
-Route::prefix('admin')->group(function (){
+Route::middleware(['auth:sanctum' , 'auth.check'])->prefix('admin')->group(function (){
 
     Route::get('/' ,[AdminController::class , 'indexAdmin']);
 
-//    Route::middleware('permission:PermissionCategory')->prefix('category')->group(function (){
-     Route::prefix('category')->group(function (){
+    Route::middleware('permission:PermissionCategory')->prefix('category')->group(function (){
         Route::get('/' , [CategoryController::class , 'index']);
         Route::get('single-category/{category}' , [CategoryController::class , 'singleCategory']);
         Route::post('store' , [CategoryController::class , 'store']);
@@ -40,8 +38,7 @@ Route::prefix('admin')->group(function (){
     Route::get('active-categories-edit/{category}' , [CategoryController::class , 'editActiveCategories']);
     Route::get('active-categories' , [CategoryController::class , 'activeCategories']);
 
-//    Route::middleware('permission:PermissionPost')->prefix('post')->group(function (){
-    Route::prefix('post')->group(function (){
+    Route::middleware('permission:PermissionPost')->prefix('post')->group(function (){
         Route::get('/' , [PostController::class , 'index']);
         Route::get('single-post/{post}' , [PostController::class , 'singlePost']);
         Route::post('store' , [PostController::class , 'store']);
@@ -73,8 +70,7 @@ Route::prefix('admin')->group(function (){
         Route::get('/activation/{user}', [CustomerController::class, 'activation']);
     });
 
-//    Route::middleware('permission:PermissionUserAdmin')->prefix('user-admin')->group(function (){
-    Route::prefix('user-admin')->group(function (){
+    Route::middleware('permission:PermissionUserAdmin')->prefix('user-admin')->group(function (){
         Route::get('/' , [AdminController::class , 'index']);
         Route::get('single-admin/{user}' , [AdminController::class , 'singleUserAdmin']);
         Route::post('store' , [AdminController::class , 'store']);

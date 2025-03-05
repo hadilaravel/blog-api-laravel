@@ -19,8 +19,7 @@ class PostController extends Controller
 
     public function postActive(Request $request)
     {
-        //        $user = auth()->user();
-        $user = User::query()->where('id' , 2)->first();
+                $user = auth()->user();
         $postCount = Post::query()->where('status' , 1)->get();
         if(isset($request->search) || isset($request->take) || isset($request->categorySlug)){
             $search = $request->search;
@@ -92,8 +91,7 @@ class PostController extends Controller
 
     public function likePost(Post $post)
     {
-//        $user = auth()->user();
-        $user = User::query()->where('id' , 2)->first();
+        $user = auth()->user();
         $user->toggleLike($post);
         if($user->hasLiked($post)) {
             return response()->json([
